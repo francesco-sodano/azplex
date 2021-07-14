@@ -1,0 +1,330 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountNameData": {
+            "type": "string",
+            "metadata": {
+                "description": "Storage Account where the Azure Function will be deployed"
+            }
+        },
+        "storageAccountNameTranscode": {
+            "type": "string",
+            "metadata": {
+                "description": "Storage Account where the Azure Function will be deployed"
+            }
+        },
+        "containerName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "containerCPU": {
+            "type": "int",
+            "defaultValue": 2,
+            "allowedValues": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "containerMemory": {
+            "type": "int",
+            "defaultValue": 4,
+            "allowedValues": [
+                2,
+                4,
+                6,
+                8
+            ],
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "plexDataSize": {
+            "type": "int",
+            "defaultValue": 300,
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "plexConfigSize": {
+            "type": "int",
+            "defaultValue": 100,
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "plexTranscodeSize": {
+            "type": "int",
+            "defaultValue": 100,
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "plexClaimToken": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "timeZone": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "tagValues": {
+            "type": "Object",
+            "metadata": {
+                "description": "Tags for all resources"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "containerServiceName": "[concat('ci',parameters('containerName'))]"
+    },
+    "resources": [
+        {   // Resource: Storage account for Plex Data and Config including "Default","data" and "config" share
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('storageAccountNameData')]",
+            "apiVersion": "2021-04-01",
+            "kind": "StorageV2",
+            "tags": "[parameters('tagValues')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": true,
+                "allowSharedKeyAccess": true,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+        {   // Resource: "default" share
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2021-04-01",
+            "name": "[concat(parameters('storageAccountNameData'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountNameData'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "shareDeleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 3
+                }
+            }
+        },
+        {   // Resource: "Config" share
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2021-04-01",
+            "name": "[concat(parameters('storageAccountNameData'), '/default/plexconfig')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountNameData'), 'default')]"
+            ],
+            "properties": {
+                "accessTier": "TransactionOptimized",
+                "shareQuota": "[parameters('plexConfigSize')]",
+                "enabledProtocols": "SMB"
+            }
+        },
+        {   // Resource: "Data" share
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2021-04-01",
+            "name": "[concat(parameters('storageAccountNameData'), '/default/plexdata')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountNameData'), 'default')]"
+            ],
+            "properties": {
+                "accessTier": "TransactionOptimized",
+                "shareQuota": "[parameters('plexDataSize')]",
+                "enabledProtocols": "SMB"
+            }
+        },
+        {   // Resource: Storage account for Plex Transcode
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('storageAccountNameTranscode')]",
+            "apiVersion": "2021-04-01",
+            "kind": "FileStorage",
+            "tags": "[parameters('tagValues')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
+            },
+            "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": true,
+                "allowSharedKeyAccess": true,
+                "largeFileSharesState": "Enabled",
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {   // Resource: "Default" share 
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2021-04-01",
+            "name": "[concat(parameters('storageAccountNameTranscode'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountNameTranscode'))]"
+            ]
+        },
+        {   // Resource: "Transode" share
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2021-04-01",
+            "name": "[concat(parameters('storageAccountNameTranscode'), '/default/plextranscode')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountNameTranscode'), 'default')]"
+            ],
+            "properties": {
+                "accessTier": "Premium",
+                "shareQuota": "[parameters('plexTranscodeSize')]",
+                "enabledProtocols": "SMB"
+            }
+        },
+        {   // Resource: Container Instance
+            "name": "[variables('containerServiceName')]",
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2019-12-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameTranscode'), 'default','plextranscode')]",
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameData'), 'default','plexdata')]",
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameData'), 'default','plexconfig')]"
+            ],
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "containers": [
+                    {
+                        "name": "[parameters('containerName')]",
+                        "properties": {
+                            "image": "plexinc/pms-docker",
+                            "environmentVariables": [
+                                {
+                                    "name": "TZ",
+                                    "value": "[parameters('timeZone')]"
+                                },
+                                {
+                                    "name": "string",
+                                    "value": "[parameters('plexClaimToken')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": "[parameters('containerCPU')]",
+                                    "memoryInGb": "[parameters('containerMemory')]"
+                                }
+                            },
+                            "ports": [
+                                {
+                                    "port": 32400
+                                }
+                            ],
+                            "volumeMounts": [
+                                {
+                                    "name": "filesharedata",
+                                    "mountPath": "/data"
+                                },
+                                {
+                                    "name": "fileshareconfig",
+                                    "mountPath": "/config"
+                                },
+                                {
+                                    "name": "filesharetranscode",
+                                    "mountPath": "/transcode"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "osType": "Linux",
+                "ipAddress": {
+                    "type": "Public",
+                    "ports": [
+                        {
+                            "protocol": "tcp",
+                            "port": 32400
+                        }
+                    ],
+                    "dnsNameLabel": "[parameters('containerName')]"
+                },
+                "volumes": [
+                    {
+                        "name": "filesharedata",
+                        "azureFile": {
+                            "shareName": "plexdata",
+                            "storageAccountName": "[parameters('storageAccountNameData')]",
+                            "storageAccountKey": "[listKeys(parameters('storageAccountNameData'), '2021-04-01').keys[0].value]"
+                        }
+                    },
+                    {
+                        "name": "fileshareconfig",
+                        "azureFile": {
+                            "shareName": "plexconfig",
+                            "storageAccountName": "[parameters('storageAccountNameData')]",
+                            "storageAccountKey": "[listKeys(parameters('storageAccountNameData'), '2021-04-01').keys[0].value]"
+                        }
+                    },
+                    {
+                        "name": "filesharetranscode",
+                        "azureFile": {
+                            "shareName": "plextranscode",
+                            "storageAccountName": "[parameters('storageAccountNameTranscode')]",
+                            "storageAccountKey": "[listKeys(parameters('storageAccountNameTranscode'), '2021-04-01').keys[0].value]"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {}
+}

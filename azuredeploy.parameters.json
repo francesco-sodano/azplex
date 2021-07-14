@@ -1,0 +1,43 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountNameData": {
+            "value": "stazplex001"
+        },
+        "storageAccountNameTranscode": {
+            "value": "stazplex002"
+        },
+        "containerName": {
+            "value": "azplex001"
+        },
+        "containerCPU": {
+            "value": 2 
+        },
+        "containerMemory": {
+            "value": 4
+        },
+        "plexDataSize": {
+            "value": 300
+        },
+        "plexConfigSize": {
+            "value": 100
+        },
+        "plexTranscodeSize": {
+            "value": 100
+        },
+        "plexClaimToken": {
+            "value": "claim-xxxx"
+        },
+        "timeZone": {
+            "value": "Europe/Zurich"
+        },
+        "tagValues": {
+            "value": {
+                "Owner": "Francesco Sodano",
+                "Project": "AZPlex Server",
+                "Environment": "Production"
+            }
+        }
+    }
+}
