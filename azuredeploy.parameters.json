@@ -5,9 +5,6 @@
         "storageAccountNameData": {
             "value": "stazplex001"
         },
-        "storageAccountNameTranscode": {
-            "value": "stazplex002"
-        },
         "containerName": {
             "value": "azplex001"
         },
