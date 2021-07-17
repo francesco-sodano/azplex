@@ -185,7 +185,7 @@
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2019-12-01",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameTranscode'), 'default','plextranscode')]",
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameData'), 'default','plextranscode')]",
                 "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameData'), 'default','plexdata')]",
                 "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameData'), 'default','plexconfig')]"
             ],
