@@ -40,27 +40,6 @@
                 "description": "description"
             }
         },
-        "plexDataSize": {
-            "type": "int",
-            "defaultValue": 300,
-            "metadata": {
-                "description": "description"
-            }
-        },
-        "plexConfigSize": {
-            "type": "int",
-            "defaultValue": 100,
-            "metadata": {
-                "description": "description"
-            }
-        },
-        "plexTranscodeSize": {
-            "type": "int",
-            "defaultValue": 100,
-            "metadata": {
-                "description": "description"
-            }
-        },
         "plexClaimToken": {
             "type": "string",
             "metadata": {
@@ -98,7 +77,7 @@
             },
             "properties": {
                 "minimumTlsVersion": "TLS1_2",
-                "allowBlobPublicAccess": true,
+                "allowBlobPublicAccess": false,
                 "allowSharedKeyAccess": true,
                 "networkAcls": {
                     "bypass": "AzureServices",
@@ -109,10 +88,6 @@
                 "supportsHttpsTrafficOnly": true,
                 "encryption": {
                     "services": {
-                        "file": {
-                            "keyType": "Account",
-                            "enabled": true
-                        },
                         "blob": {
                             "keyType": "Account",
                             "enabled": true
@@ -124,7 +99,7 @@
             }
         },
         {   // Resource: "default" share
-            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
             "apiVersion": "2021-04-01",
             "name": "[concat(parameters('storageAccountNameData'), '/default')]",
             "dependsOn": [
@@ -135,59 +110,43 @@
                 "tier": "Standard"
             },
             "properties": {
-                "shareDeleteRetentionPolicy": {
-                    "enabled": true,
-                    "days": 3
+                "deleteRetentionPolicy": {
+                    "enabled": false
                 }
             }
         },
         {   // Resource: "Config" share
-            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "apiVersion": "2021-04-01",
             "name": "[concat(parameters('storageAccountNameData'), '/default/plexconfig')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountNameData'), 'default')]"
-            ],
-            "properties": {
-                "accessTier": "Hot",
-                "shareQuota": "[parameters('plexConfigSize')]",
-                "enabledProtocols": "SMB"
-            }
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountNameData'), 'default')]"
+            ]
         },
         {   // Resource: "Data" share
-            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "apiVersion": "2021-04-01",
             "name": "[concat(parameters('storageAccountNameData'), '/default/plexdata')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountNameData'), 'default')]"
-            ],
-            "properties": {
-                "accessTier": "Hot",
-                "shareQuota": "[parameters('plexDataSize')]",
-                "enabledProtocols": "SMB"
-            }
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountNameData'), 'default')]"
+            ]
         },
-         {   // Resource: "Transode" share
-            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+        {   // Resource: "Transode" share
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "apiVersion": "2021-04-01",
             "name": "[concat(parameters('storageAccountNameData'), '/default/plextranscode')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountNameData'), 'default')]"
-            ],
-            "properties": {
-                "accessTier": "Hot",
-                "shareQuota": "[parameters('plexTranscodeSize')]",
-                "enabledProtocols": "SMB"
-            }
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountNameData'), 'default')]"
+            ]
         },
         {   // Resource: Container Instance
             "name": "[variables('containerServiceName')]",
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2019-12-01",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameData'), 'default','plextranscode')]",
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameData'), 'default','plexdata')]",
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', parameters('storageAccountNameData'), 'default','plexconfig')]"
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountNameData'), 'default','plextranscode')]",
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountNameData'), 'default','plexdata')]",
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountNameData'), 'default','plexconfig')]"
             ],
             "location": "[resourceGroup().location]",
             "properties": {

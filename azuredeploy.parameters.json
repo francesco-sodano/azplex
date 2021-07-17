@@ -14,15 +14,6 @@
         "containerMemory": {
             "value": 4
         },
-        "plexDataSize": {
-            "value": 300
-        },
-        "plexConfigSize": {
-            "value": 100
-        },
-        "plexTranscodeSize": {
-            "value": 100
-        },
         "plexClaimToken": {
             "value": "claim-8nJLkKyNQzWwhnesinbs"
         },
