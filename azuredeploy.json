@@ -138,6 +138,11 @@
                 "shareDeleteRetentionPolicy": {
                     "enabled": true,
                     "days": 3
+                },
+                "protocolSettings": {
+                    "smb": {
+                        "versions": "SMB3.0"
+                    }
                 }
             }
         },
@@ -149,7 +154,7 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountNameData'), 'default')]"
             ],
             "properties": {
-                "accessTier": "Hot",
+                "accessTier": "TransactionOptimized",
                 "shareQuota": "[parameters('plexConfigSize')]",
                 "enabledProtocols": "SMB"
             }
@@ -162,7 +167,7 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountNameData'), 'default')]"
             ],
             "properties": {
-                "accessTier": "Hot",
+                "accessTier": "TransactionOptimized",
                 "shareQuota": "[parameters('plexDataSize')]",
                 "enabledProtocols": "SMB"
             }
@@ -175,7 +180,7 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountNameData'), 'default')]"
             ],
             "properties": {
-                "accessTier": "Hot",
+                "accessTier": "TransactionOptimized",
                 "shareQuota": "[parameters('plexTranscodeSize')]",
                 "enabledProtocols": "SMB"
             }
