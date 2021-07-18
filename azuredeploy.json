@@ -98,7 +98,7 @@
             },
             "properties": {
                 "minimumTlsVersion": "TLS1_2",
-                "allowBlobPublicAccess": true,
+                "allowBlobPublicAccess": false,
                 "allowSharedKeyAccess": true,
                 "networkAcls": {
                     "bypass": "AzureServices",
@@ -106,7 +106,7 @@
                     "ipRules": [],
                     "defaultAction": "Allow"
                 },
-                "supportsHttpsTrafficOnly": true,
+                "supportsHttpsTrafficOnly": false,
                 "encryption": {
                     "services": {
                         "file": {
@@ -136,8 +136,7 @@
             },
             "properties": {
                 "shareDeleteRetentionPolicy": {
-                    "enabled": true,
-                    "days": 3
+                    "enabled": false
                 },
                 "protocolSettings": {
                     "smb": {
