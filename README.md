@@ -7,7 +7,7 @@ At the moment, you are able to access the Plex Media Server interface and congiu
 
 ## Current Architecture
 
-![AZPLex Current Architecture](https://github.com/francesco-sodano/azplex/blob/main/images/AZPlexArchitecture.JPG?raw=true)
+![AZPLex Current Architecture](https://github.com/francesco-sodano/azplex/blob/main/images/AZPlexArch.JPG?raw=true)
 
 ## Current Azure Limitations
 
