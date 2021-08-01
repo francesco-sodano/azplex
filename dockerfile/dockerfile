@@ -11,11 +11,16 @@ RUN apt-get update && apt-get -y install \
     git
 
 # Install blobfuse
-RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb \
-    && dpkg -i packages-microsoft-prod.deb \
-    && apt-get update \
-    && apt-get -y install blobfuse fuse
+RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    apt-get update && \
+    apt-get -y install blobfuse fuse && \
+    mkdir -p /blobfuse/tmp
 
-# Clean-up image
+# Cleanup
 RUN apt-get remove -y wget \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get -y autoremove && \
+    apt-get -y clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/* && \
+    rm -rf /var/tmp/*
