@@ -1,0 +1,21 @@
+FROM plexinc/pms-docker:latest
+
+# Labels
+LABEL maintainers="Francesco Sodano"
+LABEL project="AZPlex"
+
+# Install wget, git, apt-utils
+RUN apt-get update && apt-get -y install \
+    apt-utils \
+    wget \
+    git
+
+# Install blobfuse
+RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb \
+    && dpkg -i packages-microsoft-prod.deb \
+    && apt-get update \
+    && apt-get -y install blobfuse fuse
+
+# Clean-up image
+RUN apt-get remove -y wget \
+    && rm -rf /var/lib/apt/lists/*
